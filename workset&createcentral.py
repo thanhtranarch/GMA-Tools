@@ -25,6 +25,7 @@ from pyrevit import forms
 uidoc = __revit__.ActiveUIDocument
 doc = __revit__.ActiveUIDocument.Document
 """--------------------------------------------------"""
+# The workset_dict can be adjusted to meet company standards
 workset_dict= \
     {"_ARCHITECT": "USE FOR ELEMENTS IN BUILDING (EXCEPT STRUCTURAL)",
      "_CIVIL":"USE FOR CIVIL",
