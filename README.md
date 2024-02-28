@@ -1,2 +1,2 @@
 # GMA Tools with pyRevit framework REVIT API
-This repository contains the source code for GMA Tools. This code is based on and developed from pyRevit and the REVIT API
+GMA Tools is built based on PyRevit and the Revit API, designed to streamline and automate repetitive tasks for US projects.
