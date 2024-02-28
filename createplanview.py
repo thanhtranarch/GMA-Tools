@@ -2,6 +2,7 @@
 Make Plans
 Create Plans from Room List
 Author: Tran Tien Thanh
+Mail: trantienthanh.arch@gmail.com
 --------------------------------------------------------
 """
 
