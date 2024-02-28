@@ -2,6 +2,7 @@
 Workset
 Assign Workset to Project
 Author: Tran Tien Thanh
+Mail: trantienthanh.arch@gmail.com
 --------------------------------------------------------
 Click to Create Workset(s)
 Shift + Click to Create Central File
