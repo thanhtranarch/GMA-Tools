@@ -2,7 +2,6 @@
 Make Plans
 Create Plans from Room List
 Author: Tran Tien Thanh
-Mail: trantienthanh.arch@gmail.com
 --------------------------------------------------------
 """
 
@@ -36,7 +35,7 @@ plan_templates=sorted([v.Name for v in viewlist if v.ViewType == ViewType.FloorP
 RCP_templates=sorted([v.Name for v in viewlist if v.ViewType == ViewType.CeilingPlan and v.Id.IntegerValue in vtemp.values()])
 template_plan=None
 template_RCP=None
-list_rooms=[]
+list_rooms={}
 rooms_type = [("{} | #{}".format(room.LookupParameter("Name").AsString(), room.LookupParameter("Number").AsString())) for room in rooms]
 room_type_sorted = sorted(rooms_type, key=lambda x: x[0])  # Sort by room name
 plan_types = db.Collector(of_class='ViewFamilyType', is_type=True).get_elements(wrapped=True)
@@ -65,6 +64,8 @@ def get_room_info():
         }
     return room_info_dict
 def offset_bbox(bbox, offset=1):
+    # if bbox:
+    #     try:
     bboxMinX = bbox.Min.X - offset
     bboxMinY = bbox.Min.Y - offset
     bboxMinZ = bbox.Min.Z - offset
@@ -75,6 +76,12 @@ def offset_bbox(bbox, offset=1):
     newBbox.Min = DB.XYZ(bboxMinX, bboxMinY, bboxMinZ)
     newBbox.Max = DB.XYZ(bboxMaxX, bboxMaxY, bboxMaxZ)
     return newBbox
+    #     except Exception as e:
+    #         print("{}".format(e))
+    #         raise e
+    # else:
+    #     TaskDialog.Show("Get Boundary","None Boundary was getted")
+
 def create_plan(new_view, view_type_id, cropbox_visible=True, remove_underlay=True):
     t = Transaction(doc, "Create Plan View")
     t.Start()
@@ -82,7 +89,6 @@ def create_plan(new_view, view_type_id, cropbox_visible=True, remove_underlay=Tr
         name = new_view.name
         bbox = new_view.bbox
         level_id = new_view.level_id
-
         viewplan = DB.ViewPlan.Create(doc, view_type_id, level_id)
         viewplan.CropBoxActive = True
         viewplan.CropBoxVisible = cropbox_visible
@@ -123,17 +129,20 @@ selected_rooms = forms.SelectFromList.show(
     multiselect=True)
 if selected_rooms:
     for room in selected_rooms:
-        a=room.split(" |")
-        list_rooms.append(a[0])
-    for room_name in list_rooms:
+        a=room.split(" | #")
+        list_rooms[a[1]]=a[0]
+    for room_number in list_rooms:
         room_element = None
+        room_name = ""
         for room in rooms:
-            if room.LookupParameter("Name").AsString() == room_name:
+            if room.LookupParameter("Number").AsString() == room_number:
                 room_element = room
+                room_name=list_rooms[room_number]
                 break
         if room_element:
-            name_planview = "{} - ENLARGED PLAN".format(room_name)
             room_level_id = room_element.Level.Id
+            room_level=room_element.Level.Name
+            name_planview = "ENLARGED PLAN - {} - {}".format(room_name,room_level)
             room_bbox = room_element.get_BoundingBox(doc.ActiveView)
             new_bbox = offset_bbox(room_bbox)
             new_view = NewView(name=name_planview, bbox=new_bbox, level_id=room_level_id)
