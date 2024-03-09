@@ -11,6 +11,7 @@ Shift + Click to Create Central File
 __author__ ="Tran Tien Thanh"
 __title__ = "Workset \n  & Central File"
 
+# Import necessary modules
 from Autodesk.Revit.DB import (
     FilteredWorksetCollector,
     Workset,
@@ -22,40 +23,46 @@ from Autodesk.Revit.DB import (
 from Autodesk.Revit.UI import TaskDialog
 from pyrevit import forms
 
-"""--------------------------------------------------"""
+# Get active document and its UIDocument
 uidoc = __revit__.ActiveUIDocument
-doc = __revit__.ActiveUIDocument.Document
-"""--------------------------------------------------"""
-# The workset_dict can be adjusted to meet company standards
-workset_dict= \
-    {"_ARCHITECT": "USE FOR ELEMENTS IN BUILDING (EXCEPT STRUCTURAL)",
-     "_CIVIL":"USE FOR CIVIL",
-     "_FACADE":"USE FOR FACADE (EXCEPT STRUCTURE)",
-     "_LANDSCAPE":"USE FOR LANDSCAPE",
-     "_UNIT":"USE FOR UNIT, GROUP UNIT, AND FURNITURE IN UNIT",
-     "_SHARED LEVELS & GRIDS":"USE FOR GRID & LEVEL",
-     "_STRUCTURE":"USE FOR STRUCTURE",
-     "INVISIBLE":"USE FOR INVISIBLE ELEMENT"
-    }
-"""--------------------------------------------------"""
+doc = uidoc.Document
+
+# Dictionary of worksets with their descriptions
+workset_dict = {
+    "_ARCHITECT": "Elements in building (except structural)",
+    "_CIVIL": "Civil elements",
+    "_FACADE": "Facade elements (except structure)",
+    "_LANDSCAPE": "Landscape elements",
+    "_UNIT": "Unit, group unit, and furniture in unit",
+    "_SHARED LEVELS & GRIDS": "Grid and level",
+    "_STRUCTURE": "Structural elements",
+    "INVISIBLE": "Invisible elements",
+}
+
+# Set of existing workset names
 existing_workset_names = set(ws.Name for ws in FilteredWorksetCollector(doc).OfKind(WorksetKind.UserWorkset))
-new_cre_worksets=[]
-"""--------------------------------------------------"""
+
+# List to store newly created workset names
+new_cre_worksets = []
+
+# Function to enable worksharing
 def enable_worksharing():
     try:
-        doc.EnableWorksharing("_SHARED LEVELS & GRIDS","_ARCHITECT")
+        doc.EnableWorksharing("_SHARED LEVELS & GRIDS", "_ARCHITECT")
     except Exception as e:
         print("Failed to enable worksharing:", e)
 
+# Function to create worksets
 def create_worksets():
     for workset_name, description in workset_dict.items():
         if workset_name not in existing_workset_names:
-            t=Transaction(doc,"Create workset: " + workset_name)
+            t = Transaction(doc, "Create workset: " + workset_name)
             t.Start()
-            new_workse=Workset.Create(doc,workset_name)
+            new_workset = Workset.Create(doc, workset_name)
             t.Commit()
             new_cre_worksets.append(workset_name)
 
+# Function to create central file
 def create_central():
     file_name = forms.save_file()
     if file_name:
@@ -75,15 +82,18 @@ def create_central():
     else:
         TaskDialog.Show("Central Created", "Please set path")
 
+# Main logic
 if __shiftclick__:
-    create_central()
+    create_central()  # If Shift + Click, create central file
 else:
     if not doc.IsWorkshared:
-        enable_worksharing()
+        enable_worksharing()  # If not workshared, enable worksharing
     if not set(workset_dict.keys()) in existing_workset_names:
-        create_worksets()
+        create_worksets()  # If worksets don't exist, create them
         if new_cre_worksets:
-            TaskDialog.Show("Worksets Created",
-                    "The following worksets were successfully created:\n" + "\n".join(new_cre_worksets))
+            TaskDialog.Show(
+                "Worksets Created",
+                "The following worksets were successfully created:\n" + "\n".join(new_cre_worksets),
+            )
         else:
-            TaskDialog.Show("Worksets", "Worksets Existing")
+            TaskDialog.Show("Worksets", "Worksets already exist")  # Inform if worksets exist
