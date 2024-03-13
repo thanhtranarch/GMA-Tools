@@ -2,7 +2,9 @@
 Cycle Type
 Quickly Cycle Type
 Author: Tran Tien Thanh
+Mail: trantienthanh.arch@gmail.com
 --------------------------------------------------------
+source: pyRevit
 """
 
 __author__ ="Tran Tien Thanh"
