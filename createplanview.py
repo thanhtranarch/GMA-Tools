@@ -129,20 +129,27 @@ selected_rooms = forms.SelectFromList.show(
     multiselect=True)
 if selected_rooms:
     for room in selected_rooms:
-        a=room.split(" | #")
-        list_rooms[a[1]]=a[0]
+        a=room.split(" |")
+        if "UNIT" in room:
+            list_rooms[a[1].strip(" #")] = a[-1]
+        else:
+            list_rooms[a[1].strip(" #")] = a[0]
+    print(list_rooms)
     for room_number in list_rooms:
         room_element = None
         room_name = ""
         for room in rooms:
             if room.LookupParameter("Number").AsString() == room_number:
                 room_element = room
-                room_name=list_rooms[room_number]
+                room_name = list_rooms[room_number]
                 break
         if room_element:
+            if "UNIT" in room_element.LookupParameter("Name").AsString():
+                unittype=room_element.LookupParameter("Room Type").AsString()
+                name_planview = "ENLARGED PLAN - TYPE {} ({})".format(unittype,room_name)
+            else:
+                name_planview = "{} - ENLARGED PLAN - NUMBER {}".format(room_name,room_number)
             room_level_id = room_element.Level.Id
-            room_level=room_element.Level.Name
-            name_planview = "ENLARGED PLAN - {} - {}".format(room_name,room_level)
             room_bbox = room_element.get_BoundingBox(doc.ActiveView)
             new_bbox = offset_bbox(room_bbox)
             new_view = NewView(name=name_planview, bbox=new_bbox, level_id=room_level_id)
